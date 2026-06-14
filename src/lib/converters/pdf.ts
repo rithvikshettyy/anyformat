@@ -55,8 +55,23 @@ export async function compressPdf(
 
   const settings = `/d${quality.charAt(0).toUpperCase() + quality.slice(1)}`;
 
+  let gsCmd = 'gs';
+  if (process.platform === 'win32') {
+    try {
+      execSync('where.exe gswin64c', { stdio: 'ignore' });
+      gsCmd = 'gswin64c';
+    } catch {
+      try {
+        execSync('where.exe gswin32c', { stdio: 'ignore' });
+        gsCmd = 'gswin32c';
+      } catch {
+        gsCmd = 'gswin64c';
+      }
+    }
+  }
+
   execSync(
-    `gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=${settings} -dNOPAUSE -dQUIET -dBATCH -sOutputFile="${outputPath}" "${inputPath}"`,
+    `${gsCmd} -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=${settings} -dNOPAUSE -dQUIET -dBATCH -sOutputFile="${outputPath}" "${inputPath}"`,
     { timeout: 120000 }
   );
 
@@ -76,8 +91,23 @@ export async function pdfToImage(
 
   const device = outputFormat === 'jpg' || outputFormat === 'jpeg' ? 'jpeg' : 'png16m';
 
+  let gsCmd = 'gs';
+  if (process.platform === 'win32') {
+    try {
+      execSync('where.exe gswin64c', { stdio: 'ignore' });
+      gsCmd = 'gswin64c';
+    } catch {
+      try {
+        execSync('where.exe gswin32c', { stdio: 'ignore' });
+        gsCmd = 'gswin32c';
+      } catch {
+        gsCmd = 'gswin64c';
+      }
+    }
+  }
+
   execSync(
-    `gs -sDEVICE=${device} -r300 -dNOPAUSE -dQUIET -dBATCH -dFirstPage=1 -dLastPage=1 -sOutputFile="${outputPath}" "${inputPath}"`,
+    `${gsCmd} -sDEVICE=${device} -r300 -dNOPAUSE -dQUIET -dBATCH -dFirstPage=1 -dLastPage=1 -sOutputFile="${outputPath}" "${inputPath}"`,
     { timeout: 60000 }
   );
 
@@ -197,8 +227,18 @@ export async function pdfToWord(
   await ensureTempDir();
   const fileId = generateFileId();
 
+  let cmd = 'libreoffice';
+  if (process.platform === 'win32') {
+    try {
+      execSync('where.exe soffice', { stdio: 'ignore' });
+      cmd = 'soffice';
+    } catch {
+      cmd = '"C:\\Program Files\\LibreOffice\\program\\soffice.exe"';
+    }
+  }
+
   execSync(
-    `libreoffice --headless --convert-to docx --outdir "${getTempPath(fileId, '').replace(/[^/\\]+$/, '')}" "${inputPath}"`,
+    `${cmd} --headless --convert-to docx --outdir "${getTempPath(fileId, '').replace(/[^/\\]+$/, '')}" "${inputPath}"`,
     { timeout: 120000 }
   );
 

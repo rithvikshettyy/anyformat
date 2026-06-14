@@ -14,9 +14,20 @@ export async function convertToLatex(
   const ext = inputPath.split('.').pop()?.toLowerCase() || '';
   const outputPath = getTempPath(fileId, 'tex');
 
+  // Determine pandoc command (resolve path on Windows if not in PATH)
+  let pandocCmd = 'pandoc';
+  if (process.platform === 'win32') {
+    try {
+      execSync('where.exe pandoc', { stdio: 'ignore' });
+    } catch {
+      const localAppData = process.env.LOCALAPPDATA || 'C:\\Users\\ADMIN\\AppData\\Local';
+      pandocCmd = `"${localAppData}\\Pandoc\\pandoc.exe"`;
+    }
+  }
+
   if (ext === 'docx') {
     try {
-      execSync(`pandoc -f docx -t latex "${inputPath}" -o "${outputPath}"`, {
+      execSync(`${pandocCmd} -f docx -t latex "${inputPath}" -o "${outputPath}"`, {
         timeout: 60000,
         stdio: 'pipe',
       });
@@ -30,7 +41,7 @@ export async function convertToLatex(
       const docxResult = await convertDocument(inputPath, 'docx');
       
       // Step 2: Convert DOCX to LaTeX using Pandoc
-      execSync(`pandoc -f docx -t latex "${docxResult.filePath}" -o "${outputPath}"`, {
+      execSync(`${pandocCmd} -f docx -t latex "${docxResult.filePath}" -o "${outputPath}"`, {
         timeout: 60000,
         stdio: 'pipe',
       });

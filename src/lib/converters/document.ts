@@ -19,9 +19,20 @@ export async function convertDocument(
   const outDir = join(TEMP_DIR, fileId + '_out');
   await mkdir(outDir, { recursive: true });
 
+  // Determine LibreOffice command (windows uses soffice)
+  let cmd = 'libreoffice';
+  if (process.platform === 'win32') {
+    try {
+      execSync('where.exe soffice', { stdio: 'ignore' });
+      cmd = 'soffice';
+    } catch {
+      cmd = '"C:\\Program Files\\LibreOffice\\program\\soffice.exe"';
+    }
+  }
+
   // LibreOffice convert
   execSync(
-    `libreoffice --headless --norestore --convert-to ${outputFormat} --outdir "${outDir}" "${inputPath}"`,
+    `${cmd} --headless --norestore --convert-to ${outputFormat} --outdir "${outDir}" "${inputPath}"`,
     { timeout: 180000, stdio: 'pipe' }
   );
 
