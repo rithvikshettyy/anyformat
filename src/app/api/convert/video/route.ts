@@ -49,12 +49,12 @@ export async function POST(req: NextRequest) {
 
     if (file.size > MAX_FILE_SIZE.video) {
       return NextResponse.json(
-        { success: false, error: 'File too large (max 2GB)' },
+        { success: false, error: 'File too large (max 50MB)' },
         { status: 400 }
       );
     }
 
-    const { filePath: inputPath } = await saveUploadedFile(file);
+    const { filePath: inputPath } = await saveUploadedFile(file, ['mp4', 'mov', 'avi', 'mkv', 'webm', 'gif']);
 
     // Add job to the queue
     const job = await conversionQueue.add({

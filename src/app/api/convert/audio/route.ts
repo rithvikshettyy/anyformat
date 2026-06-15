@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { saveUploadedFile } from '@/lib/file-utils';
-import { MAX_FILE_SIZE } from '@/lib/constants';
+import { MAX_FILE_SIZE, AUDIO_FORMATS } from '@/lib/constants';
 import { conversionQueue } from '@/lib/queue';
 
 export async function POST(req: NextRequest) {
@@ -19,12 +19,12 @@ export async function POST(req: NextRequest) {
 
     if (file.size > MAX_FILE_SIZE.audio) {
       return NextResponse.json(
-        { success: false, error: 'File too large (max 500MB)' },
+        { success: false, error: 'File too large (max 50MB)' },
         { status: 400 }
       );
     }
 
-    const { filePath: inputPath } = await saveUploadedFile(file);
+    const { filePath: inputPath } = await saveUploadedFile(file, [...AUDIO_FORMATS]);
 
     // Add job to the queue
     const job = await conversionQueue.add({

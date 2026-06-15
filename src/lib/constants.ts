@@ -2,13 +2,13 @@ import { ConversionCategory } from '@/types';
 
 // ─── File Size Limits ───
 export const MAX_FILE_SIZE: Record<ConversionCategory, number> = {
-  image: 100 * 1024 * 1024,      // 100MB
-  pdf: 200 * 1024 * 1024,        // 200MB
-  document: 200 * 1024 * 1024,   // 200MB
-  video: 2 * 1024 * 1024 * 1024, // 2GB
-  audio: 500 * 1024 * 1024,      // 500MB
-  archive: 1024 * 1024 * 1024,   // 1GB
-  utility: 50 * 1024 * 1024,     // 50MB
+  image: 50 * 1024 * 1024,      // 50MB
+  pdf: 50 * 1024 * 1024,        // 50MB
+  document: 50 * 1024 * 1024,   // 50MB
+  video: 50 * 1024 * 1024,      // 50MB
+  audio: 50 * 1024 * 1024,      // 50MB
+  archive: 50 * 1024 * 1024,    // 50MB
+  utility: 50 * 1024 * 1024,    // 50MB
 };
 
 // ─── Temp Directory ───

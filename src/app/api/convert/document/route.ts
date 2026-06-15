@@ -19,12 +19,12 @@ export async function POST(req: NextRequest) {
 
     if (file.size > MAX_FILE_SIZE.document) {
       return NextResponse.json(
-        { success: false, error: 'File too large (max 200MB)' },
+        { success: false, error: 'File too large (max 50MB)' },
         { status: 400 }
       );
     }
 
-    const { filePath: inputPath } = await saveUploadedFile(file);
+    const { filePath: inputPath } = await saveUploadedFile(file, ['docx', 'xlsx', 'pptx', 'doc', 'xls', 'ppt', 'odt', 'ods', 'odp', 'pdf', 'txt', 'csv', 'tex', 'latex', 'md', 'png', 'jpg', 'jpeg']);
     const ext = file.name.split('.').pop()?.toLowerCase() || 'txt';
 
     // Add job to the queue

@@ -22,14 +22,18 @@ export async function POST(req: NextRequest) {
     for (const file of files) {
       if (file.size > MAX_FILE_SIZE.pdf) {
         return NextResponse.json(
-          { success: false, error: 'File too large (max 200MB)' },
+          { success: false, error: 'File too large (max 50MB)' },
           { status: 400 }
         );
       }
     }
 
     // Save all uploaded files
-    const savedFiles = await Promise.all(files.map((f) => saveUploadedFile(f)));
+    const savedFiles = await Promise.all(
+      files.map((f) =>
+        saveUploadedFile(f, ['pdf', 'jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'tiff', 'ppt', 'pptx', 'odp'])
+      )
+    );
     const inputPaths = savedFiles.map((f) => f.filePath);
 
     // Add job to the queue
