@@ -10,10 +10,22 @@ import {
   AUDIO_FORMATS
 } from '@/lib/constants';
 import { conversionQueue } from '@/lib/queue';
+import { validateTurnstileToken } from '@/lib/turnstile';
 
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
+
+    // Verify Turnstile Token
+    const turnstileToken = formData.get('turnstileToken') as string;
+    const isBotValid = await validateTurnstileToken(turnstileToken);
+    if (!isBotValid) {
+      return NextResponse.json(
+        { success: false, error: 'Bot verification failed' },
+        { status: 403 }
+      );
+    }
+
     const action = (formData.get('action') as string) || 'create';
     const outputFormat = (formData.get('outputFormat') as string) || 'zip';
     const files = formData.getAll('file') as File[];

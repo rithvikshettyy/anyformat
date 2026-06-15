@@ -30,6 +30,7 @@ import { useConversion } from '@/hooks/useConversion';
 import { getTool, getCategoryInfo, ACTION_ICONS } from '@/lib/tools-registry';
 import { ConversionCategory } from '@/types';
 import { MAX_FILE_SIZE } from '@/lib/constants';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 export default function ToolClientPage() {
   const params = useParams();
@@ -55,6 +56,7 @@ export default function ToolClientPage() {
     });
     return defaults;
   });
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const { status, progress, result, error, startConversion, reset } =
     useConversion(category as ConversionCategory);
@@ -147,7 +149,12 @@ export default function ToolClientPage() {
       const formData = new FormData();
       formData.append('action', 'qr-generate');
       formData.append('text', qrText);
-      startConversion([], { action: 'qr-generate', toolName: tool.name, text: qrText });
+      startConversion([], {
+        action: 'qr-generate',
+        toolName: tool.name,
+        text: qrText,
+        turnstileToken: turnstileToken || '',
+      });
       return;
     }
 
@@ -158,6 +165,7 @@ export default function ToolClientPage() {
       action: tool.action,
       outputFormat,
       toolName: tool.name,
+      turnstileToken: turnstileToken || '',
       ...options,
     };
 
@@ -191,6 +199,9 @@ export default function ToolClientPage() {
       formData.append('longUrl', shortLongUrl);
       if (customAlias) {
         formData.append('customCode', customAlias);
+      }
+      if (turnstileToken) {
+        formData.append('turnstileToken', turnstileToken);
       }
 
       const response = await fetch('/api/convert/utility', {
@@ -236,6 +247,7 @@ export default function ToolClientPage() {
     setCustomAlias('');
     setShortenResult(null);
     setShortenError(null);
+    setTurnstileToken(null);
   };
 
   const handleFilesSelected = (selected: File[]) => {
@@ -389,8 +401,18 @@ export default function ToolClientPage() {
                     </div>
                   )}
 
+                  {/* Turnstile Widget */}
+                  <div className="flex justify-center my-4">
+                    <Turnstile
+                      siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+                      onSuccess={(token) => setTurnstileToken(token)}
+                      onExpire={() => setTurnstileToken(null)}
+                      onError={() => setTurnstileToken(null)}
+                    />
+                  </div>
+
                   <div className="flex justify-center pt-2">
-                    <Button type="submit" size="lg" loading={shortenLoading}>
+                    <Button type="submit" size="lg" loading={shortenLoading} disabled={!turnstileToken}>
                       Shorten Link
                     </Button>
                   </div>
@@ -594,11 +616,21 @@ export default function ToolClientPage() {
                     />
                   </div>
 
+                  {/* Turnstile Widget */}
+                  <div className="flex justify-center my-4">
+                    <Turnstile
+                      siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+                      onSuccess={(token) => setTurnstileToken(token)}
+                      onExpire={() => setTurnstileToken(null)}
+                      onError={() => setTurnstileToken(null)}
+                    />
+                  </div>
+
                   <div className="flex justify-center pt-2">
                     <Button
                       size="lg"
                       onClick={handleConvert}
-                      disabled={!qrText}
+                      disabled={!qrText || !turnstileToken}
                     >
                       Generate QR Code
                     </Button>
@@ -731,10 +763,21 @@ export default function ToolClientPage() {
                               </div>
                             ))}
                           </div>
+                          {/* Turnstile Widget */}
+                          <div className="flex justify-center my-4">
+                            <Turnstile
+                              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+                              onSuccess={(token) => setTurnstileToken(token)}
+                              onExpire={() => setTurnstileToken(null)}
+                              onError={() => setTurnstileToken(null)}
+                            />
+                          </div>
+
                           <div className="flex justify-center">
                             <Button
                               size="lg"
                               onClick={handleConvert}
+                              disabled={!turnstileToken}
                             >
                               Analyze File
                             </Button>
@@ -835,10 +878,21 @@ export default function ToolClientPage() {
                           </div>
                         ))}
                       </div>
+                      {/* Turnstile Widget */}
+                      <div className="flex justify-center my-4">
+                        <Turnstile
+                          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+                          onSuccess={(token) => setTurnstileToken(token)}
+                          onExpire={() => setTurnstileToken(null)}
+                          onError={() => setTurnstileToken(null)}
+                        />
+                      </div>
+
                       <div className="flex justify-center">
                         <Button
                           size="lg"
                           onClick={handleConvert}
+                          disabled={!turnstileToken}
                         >
                           Extract Color Palette
                         </Button>
@@ -911,11 +965,21 @@ export default function ToolClientPage() {
                           </div>
                         )}
 
+                        {/* Turnstile Widget */}
+                        <div className="flex justify-center my-4">
+                          <Turnstile
+                            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+                            onSuccess={(token) => setTurnstileToken(token)}
+                            onExpire={() => setTurnstileToken(null)}
+                            onError={() => setTurnstileToken(null)}
+                          />
+                        </div>
+
                         <div className="flex justify-center pt-2">
                           <Button
                             size="lg"
                             onClick={handleConvert}
-                            disabled={!url}
+                            disabled={!url || !turnstileToken}
                           >
                             Download & Convert
                           </Button>
@@ -1072,11 +1136,22 @@ export default function ToolClientPage() {
                               </div>
                             )}
 
+                            {/* Turnstile Widget */}
+                            <div className="flex justify-center my-4">
+                              <Turnstile
+                                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+                                onSuccess={(token) => setTurnstileToken(token)}
+                                onExpire={() => setTurnstileToken(null)}
+                                onError={() => setTurnstileToken(null)}
+                              />
+                            </div>
+
                             {/* Convert Button */}
                             <div className="flex justify-center">
                               <Button
                                 size="lg"
                                 onClick={handleConvert}
+                                disabled={!turnstileToken}
                               >
                                 {tool.action === 'merge'
                                   ? `Merge ${files.length} files`

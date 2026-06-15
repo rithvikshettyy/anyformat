@@ -9,6 +9,7 @@ import DownloadCard from '@/components/conversion/DownloadCard';
 import Button from '@/components/ui/Button';
 import { useConversion } from '@/hooks/useConversion';
 import { IMAGE_FORMATS } from '@/lib/constants';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 /**
  * Handles the interactive upload, format picker, progress, and download
@@ -18,6 +19,8 @@ export default function HomeConverter() {
   const [files, setFiles] = useState<File[]>([]);
   const [inputFormat, setInputFormat] = useState('jpg');
   const [outputFormat, setOutputFormat] = useState('png');
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  
   const { status, progress, result, error, startConversion, reset } =
     useConversion('image');
 
@@ -35,12 +38,14 @@ export default function HomeConverter() {
     startConversion(files, {
       action: 'convert',
       outputFormat,
+      turnstileToken: turnstileToken || '',
     });
   };
 
   const handleReset = () => {
     reset();
     setFiles([]);
+    setTurnstileToken(null);
   };
 
   return (
@@ -86,6 +91,16 @@ export default function HomeConverter() {
                 onOutputChange={setOutputFormat}
               />
 
+              {/* Turnstile Widget */}
+              <div className="flex justify-center my-4">
+                <Turnstile
+                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+                  onSuccess={(token) => setTurnstileToken(token)}
+                  onExpire={() => setTurnstileToken(null)}
+                  onError={() => setTurnstileToken(null)}
+                />
+              </div>
+
               {/* Convert Button */}
               <div className="flex justify-center">
                 <Button
@@ -94,7 +109,7 @@ export default function HomeConverter() {
                   loading={
                     status === 'uploading' || status === 'processing'
                   }
-                  disabled={files.length === 0}
+                  disabled={files.length === 0 || !turnstileToken}
                 >
                   Convert to {outputFormat.toUpperCase()}
                 </Button>

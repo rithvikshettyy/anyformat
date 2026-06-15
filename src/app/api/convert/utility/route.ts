@@ -1,10 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateQrCode, shortenLink } from '@/lib/converters/utility';
 import { stat } from 'fs/promises';
+import { validateTurnstileToken } from '@/lib/turnstile';
 
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
+
+    // Verify Turnstile Token
+    const turnstileToken = formData.get('turnstileToken') as string;
+    const isBotValid = await validateTurnstileToken(turnstileToken);
+    if (!isBotValid) {
+      return NextResponse.json(
+        { success: false, error: 'Bot verification failed' },
+        { status: 403 }
+      );
+    }
+
     const action = formData.get('action') as string;
 
     if (!action) {

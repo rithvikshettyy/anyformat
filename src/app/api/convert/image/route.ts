@@ -2,10 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { saveUploadedFile } from '@/lib/file-utils';
 import { MAX_FILE_SIZE } from '@/lib/constants';
 import { conversionQueue } from '@/lib/queue';
+import { validateTurnstileToken } from '@/lib/turnstile';
 
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
+
+    // Verify Turnstile Token
+    const turnstileToken = formData.get('turnstileToken') as string;
+    const isBotValid = await validateTurnstileToken(turnstileToken);
+    if (!isBotValid) {
+      return NextResponse.json(
+        { success: false, error: 'Bot verification failed' },
+        { status: 403 }
+      );
+    }
+
     const action = (formData.get('action') as string) || 'convert';
     const outputFormat = (formData.get('outputFormat') as string) || 'png';
     const quality = parseInt((formData.get('quality') as string) || '90', 10);
