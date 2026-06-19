@@ -3,17 +3,19 @@
 import { useSession, signIn } from 'next-auth/react';
 import { useState } from 'react';
 import Link from 'next/link';
+import Script from 'next/script';
 
 declare global {
   interface Window {
     Razorpay: new (options: Record<string, unknown>) => {
       open: () => void;
-      on: (event: string, handler: () => void) => void;
+      on: (event: string, handler: (response: Record<string, string>) => void) => void;
     };
   }
 }
 
 const FREE_LIMIT = 15;
+const ENTERPRISE_AMOUNT = 49900; // ₹499 in paise
 
 const plans = [
   {
@@ -45,7 +47,7 @@ const plans = [
       'Priority support',
       'All file conversion tools',
     ],
-    cta: 'Subscribe Now',
+    cta: 'Pay Now',
     highlighted: true,
   },
 ];
@@ -56,7 +58,7 @@ export default function PricingPage() {
   const [error, setError] = useState('');
   const tier = (session?.user as { tier?: string } | undefined)?.tier || 'free';
 
-  async function handleSubscribe() {
+  async function handlePay() {
     if (!session) {
       signIn('google');
       return;
@@ -66,21 +68,50 @@ export default function PricingPage() {
     setError('');
 
     try {
-      const res = await fetch('/api/razorpay/subscribe', { method: 'POST' });
-      const data = await res.json();
+      // Step 1: Create order
+      const orderRes = await fetch('/api/razorpay/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: ENTERPRISE_AMOUNT, plan: 'enterprise' }),
+      });
+      const orderData = await orderRes.json();
 
-      if (!data.success) {
-        setError(data.error || 'Failed to start subscription');
+      if (!orderData.success) {
+        setError(orderData.error || 'Failed to create order');
+        setLoading(false);
         return;
       }
 
+      // Step 2: Open Razorpay checkout modal
       const options = {
-        key: data.data.keyId,
-        subscription_id: data.data.subscriptionId,
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: orderData.data.amount,
+        currency: orderData.data.currency,
         name: 'AnyFormat',
-        description: 'Enterprise Plan - Monthly',
-        handler: () => {
-          window.location.href = '/dashboard';
+        description: 'Enterprise Plan',
+        order_id: orderData.data.orderId,
+        handler: async (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) => {
+          // Step 3: Verify payment
+          try {
+            const verifyRes = await fetch('/api/razorpay/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
+            const verifyData = await verifyRes.json();
+
+            if (verifyData.success) {
+              window.location.href = '/dashboard';
+            } else {
+              setError('Payment verification failed. Contact support.');
+            }
+          } catch {
+            setError('Payment verification error. Contact support.');
+          }
         },
         prefill: {
           email: session.user?.email || '',
@@ -89,39 +120,29 @@ export default function PricingPage() {
         theme: {
           color: '#e03d2f',
         },
+        modal: {
+          ondismiss: () => {
+            setLoading(false);
+          },
+        },
       };
 
       const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', (response: Record<string, unknown>) => {
+        const err = response?.error as Record<string, string> | undefined;
+        setError(err?.description || 'Payment failed. Please try again.');
+        setLoading(false);
+      });
       rzp.open();
     } catch {
       setError('Something went wrong. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleCancel() {
-    if (!confirm('Cancel your Enterprise subscription? You will lose access at end of billing period.')) return;
-
-    setLoading(true);
-    try {
-      const res = await fetch('/api/razorpay/portal', { method: 'POST' });
-      const data = await res.json();
-      if (data.success) {
-        window.location.reload();
-      } else {
-        setError(data.error || 'Failed to cancel');
-      }
-    } catch {
-      setError('Something went wrong');
-    } finally {
       setLoading(false);
     }
   }
 
   return (
     <>
-      <script src="https://checkout.razorpay.com/v1/checkout.js" async />
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <div className="relative">
         <div className="absolute inset-0 grid-bg pointer-events-none" />
 
@@ -165,16 +186,12 @@ export default function PricingPage() {
 
                 {plan.highlighted ? (
                   tier === 'enterprise' ? (
-                    <button
-                      onClick={handleCancel}
-                      disabled={loading}
-                      className="w-full py-3 rounded-xl font-semibold border border-surface-border text-text-secondary hover:bg-surface-hover transition-colors disabled:opacity-50"
-                    >
-                      {loading ? 'Processing...' : 'Cancel Subscription'}
-                    </button>
+                    <div className="w-full py-3 rounded-xl font-semibold border border-green-600 text-green-400 text-center">
+                      Active
+                    </div>
                   ) : (
                     <button
-                      onClick={handleSubscribe}
+                      onClick={handlePay}
                       disabled={loading}
                       className="w-full py-3 rounded-xl font-semibold bg-accent hover:bg-accent-hover text-white transition-colors disabled:opacity-50"
                     >
