@@ -381,7 +381,7 @@ export default function ToolClientPage() {
                       </label>
                       <div className="relative flex items-center">
                         <span className="absolute left-4 text-text-muted text-sm border-r border-surface-border pr-3">
-                          sociovert.com/s/
+                          {typeof window !== 'undefined' ? window.location.host : ''}/s/
                         </span>
                         <input
                           type="text"
@@ -474,7 +474,7 @@ export default function ToolClientPage() {
                     <label className="text-xs font-semibold text-text-secondary block mb-1">Website Title</label>
                     <input
                       type="text"
-                      placeholder="e.g. SocioVert - Free Converter"
+                      placeholder="e.g. AnyFormat - Free Converter"
                       value={seoTitle}
                       onChange={(e) => setSeoTitle(e.target.value)}
                       className="w-full bg-background border border-surface-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-accent"
@@ -507,7 +507,7 @@ export default function ToolClientPage() {
                     <label className="text-xs font-semibold text-text-secondary block mb-1">Author Name</label>
                     <input
                       type="text"
-                      placeholder="SocioVert Team"
+                      placeholder="AnyFormat Team"
                       value={seoAuthor}
                       onChange={(e) => setSeoAuthor(e.target.value)}
                       className="w-full bg-background border border-surface-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-accent"

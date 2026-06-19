@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import HomeConverter from '@/components/conversion/HomeConverter';
-import { CATEGORIES, CATEGORY_ICONS } from '@/lib/tools-registry';
+import { TOOLS, CATEGORIES, CATEGORY_ICONS } from '@/lib/tools-registry';
 
 /**
  * Optimized Home Landing Page.
@@ -39,7 +39,7 @@ export default function HomePage() {
             All the tools you need
           </h2>
           <p className="text-text-secondary max-w-lg mx-auto">
-            24 conversion tools across 6 categories, all running on your own
+            {TOOLS.length} conversion tools across {CATEGORIES.length} categories, all running on your own
             server
           </p>
         </div>
@@ -80,7 +80,7 @@ export default function HomePage() {
                     className="text-xs font-medium mt-3"
                     style={{ color: cat.color }}
                   >
-                    {cat.toolCount} tools →
+                    {TOOLS.filter((t) => t.category === cat.slug).length} tools →
                   </p>
                 </div>
               </Link>

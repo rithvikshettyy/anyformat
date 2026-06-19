@@ -18,15 +18,16 @@ export async function generateMetadata({ params }: RouteProps): Promise<Metadata
 
   if (!tool || !categoryInfo) {
     return {
-      title: 'Tool Not Found — SocioVert',
+      title: 'Tool Not Found — AnyFormat',
     };
   }
 
   const seoInfo = getToolSeoMetadata(params.category, params.tool);
 
-  const title = seoInfo ? seoInfo.title : `${tool.name} Online - Free & Secure ${categoryInfo.name} | SocioVert`;
-  const description = seoInfo ? seoInfo.description : `${tool.description}. Convert files safely with SocioVert, the ultimate self-hosted file conversion suite. No limits, zero data tracking.`;
-  const canonicalUrl = `https://sociovert.com/tools/${params.category}/${params.tool}`;
+  const title = seoInfo ? seoInfo.title : `${tool.name} Online - Free & Secure ${categoryInfo.name} | AnyFormat`;
+  const description = seoInfo ? seoInfo.description : `${tool.description}. Convert files safely with AnyFormat, the ultimate self-hosted file conversion suite. No limits, zero data tracking.`;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://anyformat.in';
+  const canonicalUrl = `${siteUrl}/tools/${params.category}/${params.tool}`;
 
   const customKeywords = seoInfo ? seoInfo.keywords : [];
   const baseKeywords = [
@@ -56,7 +57,7 @@ export async function generateMetadata({ params }: RouteProps): Promise<Metadata
       description,
       type: 'website',
       url: canonicalUrl,
-      siteName: 'SocioVert',
+      siteName: 'AnyFormat',
     },
     twitter: {
       card: 'summary_large_image',

@@ -304,7 +304,7 @@ export const TOOLS: ConversionTool[] = [
     inputFormats: ['jpg', 'jpeg', 'png', 'webp', 'tiff', 'pdf', 'docx'],
     outputFormats: ['jpg', 'png', 'webp', 'tiff', 'pdf', 'docx'],
     icon: 'watermark',
-    action: 'convert',
+    action: 'exif-purge',
   },
   {
     slug: 'bg-removal',
@@ -509,6 +509,109 @@ export const TOOLS: ConversionTool[] = [
     outputFormats: ['text'],
     icon: 'convert',
     action: 'shorten-link',
+  },
+  {
+    slug: 'json-csv',
+    name: 'JSON/CSV Converter',
+    description: 'Convert between JSON and CSV formats instantly',
+    category: 'utility',
+    inputFormats: ['json', 'csv'],
+    outputFormats: ['json', 'csv'],
+    icon: 'convert',
+    action: 'json-csv',
+  },
+  {
+    slug: 'base64',
+    name: 'Base64 Encoder/Decoder',
+    description: 'Encode or decode text and files to/from Base64',
+    category: 'utility',
+    inputFormats: ['text'],
+    outputFormats: ['text'],
+    icon: 'convert',
+    action: 'base64',
+  },
+
+  // ── Additional Image Tools ──
+  {
+    slug: 'crop',
+    name: 'Image Cropper',
+    description: 'Crop images to exact dimensions with pixel-precise control',
+    category: 'image',
+    inputFormats: ['jpg', 'jpeg', 'png', 'webp'],
+    outputFormats: ['jpg', 'png', 'webp'],
+    icon: 'resize',
+    action: 'crop',
+    options: [
+      { name: 'x', label: 'X Offset', type: 'number', defaultValue: 0, min: 0, max: 10000 },
+      { name: 'y', label: 'Y Offset', type: 'number', defaultValue: 0, min: 0, max: 10000 },
+      { name: 'cropWidth', label: 'Width', type: 'number', defaultValue: 500, min: 1, max: 10000 },
+      { name: 'cropHeight', label: 'Height', type: 'number', defaultValue: 500, min: 1, max: 10000 },
+    ],
+  },
+  {
+    slug: 'upscale',
+    name: 'Image Upscaler',
+    description: 'Upscale images to higher resolution using advanced interpolation',
+    category: 'image',
+    inputFormats: ['jpg', 'jpeg', 'png', 'webp'],
+    outputFormats: ['jpg', 'png', 'webp'],
+    icon: 'resize',
+    action: 'upscale',
+    options: [
+      {
+        name: 'scale',
+        label: 'Scale Factor',
+        type: 'select',
+        defaultValue: '2',
+        choices: [
+          { label: '2x', value: '2' },
+          { label: '3x', value: '3' },
+          { label: '4x', value: '4' },
+        ],
+      },
+    ],
+  },
+
+  // ── Additional Video Tools ──
+  {
+    slug: 'trim',
+    name: 'Video Trimmer',
+    description: 'Trim videos by specifying start and end timestamps',
+    category: 'video',
+    inputFormats: ['mp4', 'mov', 'avi', 'mkv', 'webm'],
+    outputFormats: ['mp4'],
+    icon: 'extract',
+    action: 'trim',
+    options: [
+      { name: 'start', label: 'Start Time (e.g. 00:00:05)', type: 'text', defaultValue: '00:00:00' },
+      { name: 'end', label: 'End Time (e.g. 00:01:00)', type: 'text', defaultValue: '00:01:00' },
+    ],
+  },
+
+  // ── Additional Audio Tools ──
+  {
+    slug: 'compress',
+    name: 'Audio Compressor',
+    description: 'Compress audio files by reducing bitrate while maintaining quality',
+    category: 'audio',
+    inputFormats: ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a'],
+    outputFormats: ['mp3'],
+    icon: 'compress',
+    action: 'compress',
+    options: [
+      {
+        name: 'bitrate',
+        label: 'Target Bitrate',
+        type: 'select',
+        defaultValue: '128k',
+        choices: [
+          { label: '64 kbps (Small)', value: '64k' },
+          { label: '96 kbps', value: '96k' },
+          { label: '128 kbps (Good)', value: '128k' },
+          { label: '192 kbps (Better)', value: '192k' },
+        ],
+      },
+    ],
   },
 ];
 

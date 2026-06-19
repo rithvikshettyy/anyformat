@@ -13,8 +13,8 @@ export const MAX_FILE_SIZE: Record<ConversionCategory, number> = {
 
 // ─── Temp Directory ───
 export const TEMP_DIR = process.platform === 'win32'
-  ? `${process.env.TEMP || 'C:\\Temp'}\\sociovert`
-  : '/tmp/sociovert';
+  ? `${process.env.TEMP || 'C:\\Temp'}\\anyformat`
+  : '/tmp/anyformat';
 
 // ─── File Expiry ───
 export const FILE_EXPIRY_MS = 30 * 60 * 1000; // 30 minutes

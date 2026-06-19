@@ -62,12 +62,12 @@ const NAV_ITEMS = [
 // FAQ Configuration
 const FAQS = [
   {
-    q: 'Is SocioVert really free to use?',
-    a: 'Yes, absolutely. SocioVert is 100% free, open-source, and self-hosted. There are no hidden subscription fees, premium tiers, or artificial limits on the number of conversions you can perform.'
+    q: 'Is AnyFormat really free to use?',
+    a: 'Yes, absolutely. AnyFormat is 100% free, open-source, and self-hosted. There are no hidden subscription fees, premium tiers, or artificial limits on the number of conversions you can perform.'
   },
   {
     q: 'Are my uploaded files safe?',
-    a: 'Yes. Privacy is a core design principle of SocioVert. Your uploaded files are stored in temporarily isolated, UUID-named directories inside the local system disk. We never send your files to external APIs, cloud servers, or third-party agencies. All operations run strictly on-premise.'
+    a: 'Yes. Privacy is a core design principle of AnyFormat. Your uploaded files are stored in temporarily isolated, UUID-named directories inside the local system disk. We never send your files to external APIs, cloud servers, or third-party agencies. All operations run strictly on-premise.'
   },
   {
     q: 'What is the file size limit?',
@@ -82,16 +82,16 @@ const FAQS = [
     a: 'Uploaded and output files are automatically purged from the server temp directory after 30 minutes. This is enforced by a automated system cleanup task. You can also delete files manually immediately after downloading them.'
   },
   {
-    q: 'Does SocioVert add watermarks to my outputs?',
-    a: 'Never. Unlike standard online conversion portals, SocioVert respects the integrity of your documents and media. Your files are converted in their native formats without watermarks, modifications, or promotional overlays.'
+    q: 'Does AnyFormat add watermarks to my outputs?',
+    a: 'Never. Unlike standard online conversion portals, AnyFormat respects the integrity of your documents and media. Your files are converted in their native formats without watermarks, modifications, or promotional overlays.'
   },
   {
-    q: 'Can I deploy and host SocioVert on my own server?',
-    a: 'Yes! SocioVert is designed for easy self-hosting. The codebase is distributed under an open source license, allowing you to deploy it on your local server, home lab, or private cloud using Docker, Node, or PM2.'
+    q: 'Can I deploy and host AnyFormat on my own server?',
+    a: 'Yes! AnyFormat is designed for easy self-hosting. The codebase is distributed under an open source license, allowing you to deploy it on your local server, home lab, or private cloud using Docker, Node, or PM2.'
   },
   {
     q: 'Is there an API available for developer integrations?',
-    a: 'Yes. SocioVert includes a complete developer API. You can programmatically enqueue file conversions, check their real-time execution status, and download the resulting buffers. Refer to the API Reference section of this guide for endpoint payloads.'
+    a: 'Yes. AnyFormat includes a complete developer API. You can programmatically enqueue file conversions, check their real-time execution status, and download the resulting buffers. Refer to the API Reference section of this guide for endpoint payloads.'
   }
 ];
 
@@ -271,7 +271,7 @@ export default function DocsPage() {
               Documentation & Guides
             </h1>
             <p className="text-text-secondary text-lg max-w-3xl leading-relaxed">
-              Welcome to the SocioVert guide. Below you will find detailed documentation on getting started, tools capabilities, internal REST API endpoints, and our self-hosted privacy architecture.
+              Welcome to the AnyFormat guide. Below you will find detailed documentation on getting started, tools capabilities, internal REST API endpoints, and our self-hosted privacy architecture.
             </p>
           </div>
 
@@ -286,13 +286,13 @@ export default function DocsPage() {
             
             <div className="space-y-4 text-text-secondary leading-relaxed">
               <p>
-                SocioVert is a private, lightweight, and modern **self-hosted file converter** designed to replace remote online services. It processes all tasks directly on your server, ensuring that sensitive documents and assets never leave your control.
+                AnyFormat is a private, lightweight, and modern **self-hosted file converter** designed to replace remote online services. It processes all tasks directly on your server, ensuring that sensitive documents and assets never leave your control.
               </p>
               <p>
                 No third-party trackers, no metadata harvesting, and no subscription walls. Just professional-grade, byte-level file conversion utilities available at your disposal.
               </p>
 
-              <h3 className="text-lg font-semibold text-text-primary mt-6">How to Use SocioVert</h3>
+              <h3 className="text-lg font-semibold text-text-primary mt-6">How to Use AnyFormat</h3>
               <ol className="list-decimal pl-5 space-y-2 mt-2">
                 <li>
                   <span className="text-text-primary font-medium">Select a Tool:</span> Navigate to the <a href="/tools" className="text-accent hover:underline">Tools</a> catalog and select a conversion or utility tool matching your file format.
@@ -328,7 +328,7 @@ export default function DocsPage() {
             </div>
             
             <p className="text-text-secondary leading-relaxed">
-              SocioVert offers 6 core categories containing specialized file conversion utilities. All conversion processes are managed via an asynchronous queue system running on Redis and Bull with a concurrency factor of 3 to maximize processing throughput.
+              AnyFormat offers 6 core categories containing specialized file conversion utilities. All conversion processes are managed via an asynchronous queue system running on Redis and Bull with a concurrency factor of 3 to maximize processing throughput.
             </p>
 
             {/* PDF Tools Reference */}
@@ -678,7 +678,7 @@ export default function DocsPage() {
             </div>
             
             <p className="text-text-secondary leading-relaxed">
-              SocioVert features a robust internal REST API that powers its conversion frontend. You can query these routes directly from custom scripts or external client integrations. All API payloads accept and return JSON schemas.
+              AnyFormat features a robust internal REST API that powers its conversion frontend. You can query these routes directly from custom scripts or external client integrations. All API payloads accept and return JSON schemas.
             </p>
 
             {/* Conversion Endpoints */}
@@ -875,7 +875,7 @@ console.log(result);`}
             </div>
             
             <p className="text-text-secondary leading-relaxed">
-              SocioVert is engineered from the ground up to respect data residency guidelines and user privacy. Unlike traditional cloud conversion services, your documents are protected by strict hardware isolation boundaries.
+              AnyFormat is engineered from the ground up to respect data residency guidelines and user privacy. Unlike traditional cloud conversion services, your documents are protected by strict hardware isolation boundaries.
             </p>
 
             {/* Security architecture grids */}
@@ -896,7 +896,7 @@ console.log(result);`}
                   Isolated Disk Directories
                 </div>
                 <p className="text-xs text-text-secondary leading-relaxed">
-                  Uploaded files are sanitized using standard character filters to prevent path traversal. They are stored inside randomly-generated UUID folders in `/tmp/sociovert`, isolating memory segments.
+                  Uploaded files are sanitized using standard character filters to prevent path traversal. They are stored inside randomly-generated UUID folders in `/tmp/anyformat`, isolating memory segments.
                 </p>
               </div>
 
@@ -916,7 +916,7 @@ console.log(result);`}
                   Zero Third-party Tracking
                 </div>
                 <p className="text-xs text-text-secondary leading-relaxed">
-                  No cookie tracking engines, advertisement trackers, or analytics scripts are loaded in SocioVert. Your usage remains 100% private, anonymous, and secured.
+                  No cookie tracking engines, advertisement trackers, or analytics scripts are loaded in AnyFormat. Your usage remains 100% private, anonymous, and secured.
                 </p>
               </div>
             </div>
@@ -932,7 +932,7 @@ console.log(result);`}
             </div>
             
             <p className="text-text-secondary leading-relaxed">
-              Find answers to common questions about SocioVert&apos;s features, operations, and deployment parameters.
+              Find answers to common questions about AnyFormat&apos;s features, operations, and deployment parameters.
             </p>
 
             {/* Accordion List */}

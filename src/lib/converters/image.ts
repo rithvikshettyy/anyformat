@@ -63,7 +63,7 @@ export async function compressImage(
       pipeline = pipeline.jpeg({ quality, mozjpeg: true });
       break;
     case 'png':
-      pipeline = pipeline.png({ quality, compressionLevel: 9 });
+      pipeline = pipeline.png({ quality, compressionLevel: Math.round(9 - (quality / 100) * 9) });
       break;
     case 'webp':
       pipeline = pipeline.webp({ quality });
@@ -94,6 +94,99 @@ export async function resizeImage(
   let pipeline = sharp(inputPath).resize(width, height, {
     fit,
     withoutEnlargement: true,
+  });
+
+  const fmt = format.toLowerCase();
+  switch (fmt) {
+    case 'jpg':
+    case 'jpeg':
+      pipeline = pipeline.jpeg({ quality: 90 });
+      break;
+    case 'png':
+      pipeline = pipeline.png();
+      break;
+    case 'webp':
+      pipeline = pipeline.webp({ quality: 90 });
+      break;
+    default:
+      pipeline = pipeline.jpeg({ quality: 90 });
+  }
+
+  const buffer = await pipeline.toBuffer();
+  const ext = fmt === 'jpeg' ? 'jpg' : fmt;
+  return saveTempBuffer(buffer, ext);
+}
+
+/**
+ * Crop an image to specified region
+ */
+export async function cropImage(
+  inputPath: string,
+  x: number,
+  y: number,
+  cropWidth: number,
+  cropHeight: number,
+  outputFormat?: string
+): Promise<{ filePath: string; fileId: string }> {
+  const metadata = await sharp(inputPath).metadata();
+  const format = outputFormat || metadata.format || 'jpeg';
+
+  const imgWidth = metadata.width || 0;
+  const imgHeight = metadata.height || 0;
+
+  const safeX = Math.max(0, Math.min(x, imgWidth - 1));
+  const safeY = Math.max(0, Math.min(y, imgHeight - 1));
+  const safeW = Math.min(cropWidth, imgWidth - safeX);
+  const safeH = Math.min(cropHeight, imgHeight - safeY);
+
+  if (safeW <= 0 || safeH <= 0) {
+    throw new Error('Crop dimensions are outside the image bounds');
+  }
+
+  let pipeline = sharp(inputPath).extract({
+    left: safeX,
+    top: safeY,
+    width: safeW,
+    height: safeH,
+  });
+
+  const fmt = format.toLowerCase();
+  switch (fmt) {
+    case 'jpg':
+    case 'jpeg':
+      pipeline = pipeline.jpeg({ quality: 90 });
+      break;
+    case 'png':
+      pipeline = pipeline.png();
+      break;
+    case 'webp':
+      pipeline = pipeline.webp({ quality: 90 });
+      break;
+    default:
+      pipeline = pipeline.jpeg({ quality: 90 });
+  }
+
+  const buffer = await pipeline.toBuffer();
+  const ext = fmt === 'jpeg' ? 'jpg' : fmt;
+  return saveTempBuffer(buffer, ext);
+}
+
+/**
+ * Upscale an image by a given factor
+ */
+export async function upscaleImage(
+  inputPath: string,
+  scale: number = 2,
+  outputFormat?: string
+): Promise<{ filePath: string; fileId: string }> {
+  const metadata = await sharp(inputPath).metadata();
+  const format = outputFormat || metadata.format || 'jpeg';
+  const width = (metadata.width || 100) * scale;
+  const height = (metadata.height || 100) * scale;
+
+  let pipeline = sharp(inputPath).resize(width, height, {
+    kernel: sharp.kernel.lanczos3,
+    withoutEnlargement: false,
   });
 
   const fmt = format.toLowerCase();

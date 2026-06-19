@@ -1,9 +1,9 @@
 import archiver from 'archiver';
-import { createWriteStream } from 'fs';
+import { createWriteStream, readdirSync, statSync } from 'fs';
 import { execSync } from 'child_process';
 import { ensureTempDir, generateFileId, getTempPath } from '../file-utils';
 import { join } from 'path';
-import { mkdir } from 'fs/promises';
+import { mkdir, rm } from 'fs/promises';
 
 /**
  * Create an archive from multiple files
@@ -90,6 +90,23 @@ export async function extractArchive(
       throw new Error(`Unsupported archive format: ${ext}`);
   }
 
+  // Check total extracted size to prevent zip bombs (500MB limit)
+  const MAX_EXTRACTED_SIZE = 500 * 1024 * 1024;
+  function getDirSize(dir: string): number {
+    let total = 0;
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, entry.name);
+      if (entry.isDirectory()) total += getDirSize(full);
+      else total += statSync(full).size;
+    }
+    return total;
+  }
+  const extractedSize = getDirSize(extractDir);
+  if (extractedSize > MAX_EXTRACTED_SIZE) {
+    await rm(extractDir, { recursive: true, force: true });
+    throw new Error('Extracted archive exceeds 500MB size limit');
+  }
+
   // Re-archive extracted contents as ZIP for download
   const outputPath = getTempPath(fileId, 'zip');
 
@@ -97,11 +114,13 @@ export async function extractArchive(
     const output = createWriteStream(outputPath);
     const archive = archiver('zip', { zlib: { level: 9 } });
 
-    output.on('close', () => {
+    output.on('close', async () => {
+      try { await rm(extractDir, { recursive: true, force: true }); } catch {}
       resolve({ filePath: outputPath, fileId });
     });
 
     archive.on('error', (err: Error) => {
+      rm(extractDir, { recursive: true, force: true }).catch(() => {});
       reject(err);
     });
 

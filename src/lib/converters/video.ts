@@ -103,3 +103,23 @@ export async function extractAudio(
 
   return { filePath: outputPath, fileId };
 }
+
+/**
+ * Trim video by start and end timestamps
+ */
+export async function trimVideo(
+  inputPath: string,
+  start: string = '00:00:00',
+  end: string = '00:01:00'
+): Promise<{ filePath: string; fileId: string }> {
+  await ensureTempDir();
+  const fileId = generateFileId();
+  const outputPath = getTempPath(fileId, 'mp4');
+
+  execSync(
+    `ffmpeg -i "${inputPath}" -ss ${start} -to ${end} -c:v libx264 -c:a aac -movflags +faststart -y "${outputPath}"`,
+    { timeout: 600000, stdio: 'pipe' }
+  );
+
+  return { filePath: outputPath, fileId };
+}

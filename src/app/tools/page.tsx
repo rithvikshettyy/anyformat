@@ -13,16 +13,17 @@ export async function generateMetadata({ searchParams }: ToolsPageProps): Promis
   const categoryInfo = activeCategory ? getCategoryInfo(activeCategory) : null;
 
   const title = categoryInfo
-    ? `${categoryInfo.name} Online - Free & Secure Tools | SocioVert`
-    : 'All File Conversion Tools - PDF, Video, Image, Audio | SocioVert';
+    ? `${categoryInfo.name} Online - Free & Secure Tools | AnyFormat`
+    : 'All File Conversion Tools - PDF, Video, Image, Audio | AnyFormat';
 
   const description = categoryInfo
     ? `${categoryInfo.description}. Access professional, self-hosted, secure, and fast tools for ${categoryInfo.name.toLowerCase()} with zero logs.`
     : `Access ${TOOLS.length} free, secure, and self-hosted file conversion tools. Compress, convert, merge, split, and edit files with complete privacy.`;
 
-  const canonicalUrl = activeCategory 
-    ? `https://sociovert.com/tools?category=${activeCategory}`
-    : 'https://sociovert.com/tools';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://anyformat.in';
+  const canonicalUrl = activeCategory
+    ? `${siteUrl}/tools?category=${activeCategory}`
+    : `${siteUrl}/tools`;
 
   return {
     title,
@@ -35,7 +36,7 @@ export async function generateMetadata({ searchParams }: ToolsPageProps): Promis
       description,
       type: 'website',
       url: canonicalUrl,
-      siteName: 'SocioVert',
+      siteName: 'AnyFormat',
     },
     twitter: {
       card: 'summary_large_image',

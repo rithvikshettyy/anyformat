@@ -1,6 +1,7 @@
 import { PDFDocument, degrees, rgb, StandardFonts } from 'pdf-lib';
 import { readFile, rename } from 'fs/promises';
 import { execSync } from 'child_process';
+import { parse } from 'path';
 import { saveTempBuffer, generateFileId, getTempPath, ensureTempDir } from '../file-utils';
 
 /**
@@ -35,6 +36,9 @@ export async function splitPdf(
   const totalPages = srcDoc.getPageCount();
 
   const pageIndices = parsePageRange(pageRange, totalPages);
+  if (pageIndices.length === 0) {
+    throw new Error('No valid pages found in the specified range');
+  }
   const pages = await newDoc.copyPages(srcDoc, pageIndices);
   pages.forEach((page) => newDoc.addPage(page));
 
@@ -79,7 +83,8 @@ export async function compressPdf(
 }
 
 /**
- * Convert PDF pages to images using Ghostscript
+ * Convert PDF pages to images using Ghostscript.
+ * Single-page PDFs return a single image; multi-page PDFs return a ZIP of images.
  */
 export async function pdfToImage(
   inputPath: string,
@@ -87,9 +92,8 @@ export async function pdfToImage(
 ): Promise<{ filePath: string; fileId: string }> {
   await ensureTempDir();
   const fileId = generateFileId();
-  const outputPath = getTempPath(fileId, outputFormat);
-
-  const device = outputFormat === 'jpg' || outputFormat === 'jpeg' ? 'jpeg' : 'png16m';
+  const ext = outputFormat === 'jpg' || outputFormat === 'jpeg' ? 'jpg' : 'png';
+  const device = ext === 'jpg' ? 'jpeg' : 'png16m';
 
   let gsCmd = 'gs';
   if (process.platform === 'win32') {
@@ -106,10 +110,51 @@ export async function pdfToImage(
     }
   }
 
+  const bytes = await readFile(inputPath);
+  const doc = await PDFDocument.load(bytes);
+  const pageCount = doc.getPageCount();
+
+  if (pageCount === 1) {
+    const outputPath = getTempPath(fileId, ext);
+    execSync(
+      `${gsCmd} -sDEVICE=${device} -r300 -dNOPAUSE -dQUIET -dBATCH -sOutputFile="${outputPath}" "${inputPath}"`,
+      { timeout: 60000 }
+    );
+    return { filePath: outputPath, fileId };
+  }
+
+  // Multi-page: render each page, then ZIP
+  const { mkdir, rm: rmDir } = await import('fs/promises');
+  const { join } = await import('path');
+  const { default: archiver } = await import('archiver');
+  const { createWriteStream, readdirSync } = await import('fs');
+  const { TEMP_DIR } = await import('../constants');
+
+  const imgDir = join(TEMP_DIR, `${fileId}_pages`);
+  await mkdir(imgDir, { recursive: true });
+
   execSync(
-    `${gsCmd} -sDEVICE=${device} -r300 -dNOPAUSE -dQUIET -dBATCH -dFirstPage=1 -dLastPage=1 -sOutputFile="${outputPath}" "${inputPath}"`,
-    { timeout: 60000 }
+    `${gsCmd} -sDEVICE=${device} -r300 -dNOPAUSE -dQUIET -dBATCH -sOutputFile="${join(imgDir, `page-%03d.${ext}`)}" "${inputPath}"`,
+    { timeout: 120000 }
   );
+
+  const outputPath = getTempPath(fileId, 'zip');
+
+  await new Promise<void>((resolve, reject) => {
+    const output = createWriteStream(outputPath);
+    const archive = archiver('zip', { zlib: { level: 6 } });
+    output.on('close', () => resolve());
+    archive.on('error', reject);
+    archive.pipe(output);
+
+    const files = readdirSync(imgDir).sort();
+    for (const f of files) {
+      archive.file(join(imgDir, f), { name: f });
+    }
+    archive.finalize();
+  });
+
+  try { await rmDir(imgDir, { recursive: true, force: true }); } catch {}
 
   return { filePath: outputPath, fileId };
 }
@@ -237,7 +282,7 @@ export async function pdfToWord(
     }
   }
 
-  const inputBasename = inputPath.split(/[/\\]/).pop()?.split('.').shift() || '';
+  const inputBasename = parse(inputPath).name;
 
   execSync(
     `${cmd} --headless --convert-to docx --outdir "${getTempPath(fileId, '').replace(/[^/\\]+$/, '')}" "${inputPath}"`,
@@ -271,7 +316,7 @@ export async function pdfToExcel(
     }
   }
 
-  const inputBasename = inputPath.split(/[/\\]/).pop()?.split('.').shift() || '';
+  const inputBasename = parse(inputPath).name;
 
   execSync(
     `${cmd} --headless --convert-to xlsx --outdir "${getTempPath(fileId, '').replace(/[^/\\]+$/, '')}" "${inputPath}"`,
@@ -305,7 +350,7 @@ export async function pptToPdf(
     }
   }
 
-  const inputBasename = inputPath.split(/[/\\]/).pop()?.split('.').shift() || '';
+  const inputBasename = parse(inputPath).name;
 
   execSync(
     `${cmd} --headless --convert-to pdf --outdir "${getTempPath(fileId, '').replace(/[^/\\]+$/, '')}" "${inputPath}"`,

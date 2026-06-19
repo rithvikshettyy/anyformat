@@ -1,15 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { existsSync } from 'fs';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
-
-const LINKS_FILE_PATH = join(process.cwd(), 'src', 'data', 'links.json');
-
-interface LinkMapping {
-  shortCode: string;
-  longUrl: string;
-  createdAt: string;
-}
+import { getShortLink, incrementClicks } from '@/lib/link-store';
 
 export async function GET(
   req: NextRequest,
@@ -21,20 +11,22 @@ export async function GET(
     return NextResponse.redirect(new URL('/', req.nextUrl.origin));
   }
 
-  if (existsSync(LINKS_FILE_PATH)) {
-    try {
-      const fileData = await readFile(LINKS_FILE_PATH, 'utf-8');
-      const links: LinkMapping[] = JSON.parse(fileData);
-      
-      const mapping = links.find((l) => l.shortCode.toLowerCase() === code.toLowerCase());
-      if (mapping) {
-        return NextResponse.redirect(new URL(mapping.longUrl));
+  try {
+    const link = await getShortLink(code);
+    if (link) {
+      const target = new URL(link.longUrl);
+      if (!['http:', 'https:'].includes(target.protocol)) {
+        return NextResponse.redirect(new URL('/', req.nextUrl.origin));
       }
-    } catch (error) {
-      console.error('Error reading short links database:', error);
+
+      // Track click asynchronously (don't block redirect)
+      incrementClicks(code).catch(() => {});
+
+      return NextResponse.redirect(target);
     }
+  } catch (error) {
+    console.error('Error looking up short link:', error);
   }
 
-  // Fallback to home page if code is not found
   return NextResponse.redirect(new URL('/', req.nextUrl.origin));
 }

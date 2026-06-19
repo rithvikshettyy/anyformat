@@ -11,6 +11,7 @@ import Button from '@/components/ui/Button';
 const NAV_ITEMS = [
   { href: '/', label: 'Home' },
   { href: '/tools', label: 'Tools' },
+  { href: '/pricing', label: 'Pricing' },
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/docs', label: 'Docs' },
 ];
@@ -27,7 +28,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center group">
             <span className="text-xl md:text-2xl font-bold text-text-primary tracking-tight">
-              Socio<span className="text-accent">Vert</span>
+              Any<span className="text-accent">Format</span>
             </span>
           </Link>
 

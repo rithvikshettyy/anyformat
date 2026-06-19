@@ -66,7 +66,7 @@ conversionQueue.process(3, async (job) => {
 
   switch (category) {
     case 'image': {
-      const { convertImage, compressImage, resizeImage } = await import('./converters/image');
+      const { convertImage, compressImage, resizeImage, cropImage, upscaleImage } = await import('./converters/image');
       const { removeBackground } = await import('./converters/bg-removal');
       const { extractColorPalette, generateQrCode } = await import('./converters/utility');
       const { purgeExif } = await import('./converters/privacy');
@@ -104,6 +104,15 @@ conversionQueue.process(3, async (job) => {
         const width = parseInt(options.width || '0', 10);
         const height = parseInt(options.height || '0', 10);
         result = await resizeImage(filePath, width, height, outputFormat);
+      } else if (action === 'crop') {
+        const x = parseInt(options.x || '0', 10);
+        const y = parseInt(options.y || '0', 10);
+        const cropWidth = parseInt(options.cropWidth || '500', 10);
+        const cropHeight = parseInt(options.cropHeight || '500', 10);
+        result = await cropImage(filePath, x, y, cropWidth, cropHeight, outputFormat);
+      } else if (action === 'upscale') {
+        const scale = parseInt(options.scale || '2', 10);
+        result = await upscaleImage(filePath, scale, outputFormat);
       } else {
         throw new Error(`Unknown action: ${action}`);
       }
@@ -179,7 +188,7 @@ conversionQueue.process(3, async (job) => {
     }
 
     case 'video': {
-      const { convertVideo, compressVideo, extractAudio } = await import('./converters/video');
+      const { convertVideo, compressVideo, extractAudio, trimVideo } = await import('./converters/video');
 
       if (action === 'download') {
         const { downloadMedia } = await import('./converters/downloader');
@@ -202,6 +211,8 @@ conversionQueue.process(3, async (job) => {
         result = await compressVideo(filePath, quality);
       } else if (action === 'extract') {
         result = await extractAudio(filePath, outputFormat);
+      } else if (action === 'trim') {
+        result = await trimVideo(filePath, options.start || '00:00:00', options.end || '00:01:00');
       } else {
         throw new Error(`Unknown action: ${action}`);
       }
@@ -209,8 +220,12 @@ conversionQueue.process(3, async (job) => {
     }
 
     case 'audio': {
-      const { convertAudio } = await import('./converters/audio');
-      result = await convertAudio(filePath, outputFormat, options.bitrate || '192k');
+      const { convertAudio, compressAudio } = await import('./converters/audio');
+      if (action === 'compress') {
+        result = await compressAudio(filePath, options.bitrate || '128k');
+      } else {
+        result = await convertAudio(filePath, outputFormat, options.bitrate || '192k');
+      }
       break;
     }
 

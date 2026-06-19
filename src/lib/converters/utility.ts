@@ -1,18 +1,9 @@
 import QRCode from 'qrcode';
 import sharp from 'sharp';
-import { existsSync } from 'fs';
-import { mkdir, readFile, writeFile, rm } from 'fs/promises';
-import { join } from 'path';
+import { readFile, rm } from 'fs/promises';
 import { ensureTempDir, generateFileId, getTempPath } from '../file-utils';
 import { convertDocument } from './document';
-
-const LINKS_FILE_PATH = join(process.cwd(), 'src', 'data', 'links.json');
-
-interface LinkMapping {
-  shortCode: string;
-  longUrl: string;
-  createdAt: string;
-}
+import { createShortLink, shortCodeExists } from '../link-store';
 
 /**
  * Generates a QR Code for text/URL and saves it as a PNG file.
@@ -187,72 +178,103 @@ export async function countWords(
 }
 
 /**
- * Shortens a URL using local JSON-file persistence.
+ * Shortens a URL using Redis-backed persistence (with in-memory fallback).
  */
 export async function shortenLink(
   longUrl: string,
-  customCode?: string
+  customCode?: string,
+  userId?: string
 ): Promise<{ shortCode: string; longUrl: string }> {
-  // Validate URL structure
+  // Validate URL structure and protocol
   try {
-    new URL(longUrl);
-  } catch {
-    throw new Error('Invalid URL format');
-  }
-
-  // Ensure data folder exists
-  const dataDir = join(process.cwd(), 'src', 'data');
-  if (!existsSync(dataDir)) {
-    await mkdir(dataDir, { recursive: true });
-  }
-
-  // Read existing links
-  let links: LinkMapping[] = [];
-  if (existsSync(LINKS_FILE_PATH)) {
-    try {
-      const fileData = await readFile(LINKS_FILE_PATH, 'utf-8');
-      links = JSON.parse(fileData);
-    } catch {
-      links = [];
+    const parsed = new URL(longUrl);
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      throw new Error('Only HTTP and HTTPS URLs are allowed');
     }
+  } catch (e) {
+    if (e instanceof Error && e.message.includes('Only HTTP')) throw e;
+    throw new Error('Invalid URL format');
   }
 
   let code = customCode ? customCode.trim() : '';
 
   if (code) {
-    // Validate custom code
     if (!/^[a-zA-Z0-9_-]+$/.test(code)) {
       throw new Error('Custom alias can only contain letters, numbers, hyphens, and underscores');
     }
-    // Check if already exists
-    const exists = links.some((l) => l.shortCode.toLowerCase() === code.toLowerCase());
+    const exists = await shortCodeExists(code);
     if (exists) {
       throw new Error('Custom alias is already taken');
     }
   } else {
-    // Generate unique random 6-character code
-    let isUnique = false;
     const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let isUnique = false;
     while (!isUnique) {
       code = '';
       for (let i = 0; i < 6; i++) {
         code += chars.charAt(Math.floor(Math.random() * chars.length));
       }
-      isUnique = !links.some((l) => l.shortCode === code);
+      isUnique = !(await shortCodeExists(code));
     }
   }
 
-  // Save to list
-  links.push({
-    shortCode: code,
-    longUrl,
-    createdAt: new Date().toISOString(),
-  });
+  await createShortLink(longUrl, code, userId);
 
-  await writeFile(LINKS_FILE_PATH, JSON.stringify(links, null, 2), 'utf-8');
+  return { shortCode: code, longUrl };
+}
 
-  return {
-    shortCode: code,
-    longUrl,
-  };
+/**
+ * Convert between JSON and CSV formats.
+ */
+export function convertJsonCsv(
+  input: string,
+  inputFormat: 'json' | 'csv'
+): string {
+  if (inputFormat === 'json') {
+    const data = JSON.parse(input);
+    const rows: Record<string, unknown>[] = Array.isArray(data) ? data : [data];
+    if (rows.length === 0) return '';
+    const headers = Object.keys(rows[0]);
+    const csvRows = [
+      headers.join(','),
+      ...rows.map((row) =>
+        headers
+          .map((h) => {
+            const val = String(row[h] ?? '');
+            return val.includes(',') || val.includes('"') || val.includes('\n')
+              ? `"${val.replace(/"/g, '""')}"`
+              : val;
+          })
+          .join(',')
+      ),
+    ];
+    return csvRows.join('\n');
+  } else {
+    const lines = input.trim().split('\n');
+    if (lines.length < 2) throw new Error('CSV must have at least a header row and one data row');
+    const headers = lines[0].split(',').map((h) => h.trim().replace(/^"|"$/g, ''));
+    const rows = lines.slice(1).map((line) => {
+      const values = line.split(',').map((v) => v.trim().replace(/^"|"$/g, ''));
+      const obj: Record<string, string> = {};
+      headers.forEach((h, i) => {
+        obj[h] = values[i] || '';
+      });
+      return obj;
+    });
+    return JSON.stringify(rows, null, 2);
+  }
+}
+
+/**
+ * Encode or decode Base64.
+ */
+export function convertBase64(
+  input: string,
+  mode: 'encode' | 'decode'
+): string {
+  if (mode === 'encode') {
+    return Buffer.from(input, 'utf-8').toString('base64');
+  } else {
+    return Buffer.from(input, 'base64').toString('utf-8');
+  }
 }

@@ -12,6 +12,7 @@ const inter = Inter({
 });
 
 import type { Viewport } from 'next';
+import { getSiteUrl } from '@/lib/site-config';
 
 export const viewport: Viewport = {
   themeColor: '#0f172a',
@@ -21,10 +22,10 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://sociovert.com'),
+  metadataBase: new URL(getSiteUrl()),
   title: {
-    default: 'SocioVert — Free Self-Hosted File Converter',
-    template: '%s | SocioVert',
+    default: 'AnyFormat — Free Self-Hosted File Converter',
+    template: '%s | AnyFormat',
   },
   description:
     'Convert files for free. PDF, images, video, audio, documents, and archives. Self-hosted, no tracking, no limits. Your files never leave your server.',
@@ -72,9 +73,9 @@ export const metadata: Metadata = {
     'ilovepdf alternative',
     'smallpdf alternative',
   ],
-  authors: [{ name: 'SocioVert' }],
-  creator: 'SocioVert',
-  publisher: 'SocioVert',
+  authors: [{ name: 'AnyFormat' }],
+  creator: 'AnyFormat',
+  publisher: 'AnyFormat',
   formatDetection: {
     email: false,
     address: false,
@@ -84,20 +85,20 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: 'SocioVert — Convert Any File Free Forever',
+    title: 'AnyFormat — Convert Any File Free Forever',
     description:
       'Convert files for free. PDF, images, video, audio, documents, and archives. Self-hosted, no tracking, no limits. Your files never leave your server.',
-    url: 'https://sociovert.com',
-    siteName: 'SocioVert',
+    url: getSiteUrl(),
+    siteName: 'AnyFormat',
     locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'SocioVert — Convert Any File Free Forever',
+    title: 'AnyFormat — Convert Any File Free Forever',
     description:
       'Convert files for free. PDF, images, video, audio, documents, and archives. Self-hosted, no tracking, no limits. Your files never leave your server.',
-    creator: '@sociovert',
+    creator: '@anyformat',
   },
   robots: {
     index: true,
@@ -113,6 +114,33 @@ export const metadata: Metadata = {
 };
 
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'AnyFormat',
+  url: getSiteUrl(),
+  description: 'Free self-hosted file conversion platform. Convert PDF, images, video, audio, documents, and archives with complete privacy.',
+  applicationCategory: 'UtilitiesApplication',
+  operatingSystem: 'Any',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  featureList: [
+    'PDF conversion and editing',
+    'Image format conversion',
+    'Video conversion and compression',
+    'Audio format conversion',
+    'URL shortening with analytics',
+    'Document conversion',
+    'Archive creation and extraction',
+    'OCR text recognition',
+    'EXIF metadata removal',
+    'QR code generation',
+  ],
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -120,6 +148,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className="font-sans bg-background text-text-primary min-h-screen flex flex-col">
         <Providers>
           <Header />

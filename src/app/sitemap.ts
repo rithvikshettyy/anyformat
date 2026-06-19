@@ -1,8 +1,9 @@
 import type { MetadataRoute } from 'next';
 import { TOOLS } from '@/lib/tools-registry';
+import { getSiteUrl } from '@/lib/site-config';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://sociovert.com';
+  const baseUrl = getSiteUrl();
 
   // Base routes
   const routes = [

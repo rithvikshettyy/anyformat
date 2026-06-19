@@ -44,3 +44,13 @@ export async function convertAudio(
 
   return { filePath: outputPath, fileId };
 }
+
+/**
+ * Compress audio by re-encoding to MP3 at a target bitrate
+ */
+export async function compressAudio(
+  inputPath: string,
+  bitrate: string = '128k'
+): Promise<{ filePath: string; fileId: string }> {
+  return convertAudio(inputPath, 'mp3', bitrate);
+}

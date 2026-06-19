@@ -20,7 +20,14 @@ export type ConversionAction =
   | 'shorten-link'
   | 'pdf-to-excel'
   | 'ppt-to-pdf'
-  | 'protect';
+  | 'protect'
+  | 'exif-purge'
+  | 'crop'
+  | 'upscale'
+  | 'trim'
+  | 'json-csv'
+  | 'base64'
+  | 'diff';
 
 export type ConversionStatus = 'idle' | 'uploading' | 'processing' | 'completed' | 'error';
 

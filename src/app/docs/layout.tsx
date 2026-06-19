@@ -1,21 +1,24 @@
 import type { Metadata } from 'next';
+import { getSiteUrl } from '@/lib/site-config';
+
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
-  title: 'Documentation & API Reference | SocioVert',
-  description: 'Explore the user guide, tools reference, developer API routes, and privacy policy for SocioVert. Self-hosted, private-first file conversion.',
+  title: 'Documentation & API Reference | AnyFormat',
+  description: 'Explore the user guide, tools reference, developer API routes, and privacy policy for AnyFormat. Self-hosted, private-first file conversion.',
   alternates: {
-    canonical: 'https://sociovert.com/docs',
+    canonical: `${siteUrl}/docs`,
   },
   openGraph: {
-    title: 'Documentation & API Reference | SocioVert',
-    description: 'Explore the user guide, tools reference, developer API routes, and privacy policy for SocioVert. Self-hosted, private-first file conversion.',
-    url: 'https://sociovert.com/docs',
-    siteName: 'SocioVert',
+    title: 'Documentation & API Reference | AnyFormat',
+    description: 'Explore the user guide, tools reference, developer API routes, and privacy policy for AnyFormat. Self-hosted, private-first file conversion.',
+    url: `${siteUrl}/docs`,
+    siteName: 'AnyFormat',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Documentation & API Reference | SocioVert',
-    description: 'Explore the user guide, tools reference, developer API routes, and privacy policy for SocioVert. Self-hosted, private-first file conversion.',
+    title: 'Documentation & API Reference | AnyFormat',
+    description: 'Explore the user guide, tools reference, developer API routes, and privacy policy for AnyFormat. Self-hosted, private-first file conversion.',
   },
 };
 

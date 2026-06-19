@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'sociovert',
+      name: 'anyformat',
       script: '.next/standalone/server.js',
       cwd: __dirname,
       env: {
