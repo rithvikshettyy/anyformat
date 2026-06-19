@@ -1,13 +1,16 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import Razorpay from 'razorpay';
 import { getRazorpaySubscriptionId, setUserTier, clearRazorpaySubscription } from '@/lib/user-store';
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || '',
-  key_secret: process.env.RAZORPAY_KEY_SECRET || '',
-});
+function getRazorpay() {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const Razorpay = require('razorpay');
+  return new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID || '',
+    key_secret: process.env.RAZORPAY_KEY_SECRET || '',
+  });
+}
 
 export async function POST() {
   try {
@@ -30,7 +33,7 @@ export async function POST() {
     }
 
     // Cancel subscription at end of current billing period
-    await razorpay.subscriptions.cancel(subscriptionId, false);
+    await getRazorpay().subscriptions.cancel(subscriptionId, false);
     await setUserTier(email, 'free');
     await clearRazorpaySubscription(email);
 

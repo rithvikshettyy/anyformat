@@ -1,17 +1,20 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import Razorpay from 'razorpay';
 import {
   getRazorpayCustomerId,
   setRazorpayCustomerId,
   setRazorpaySubscriptionId,
 } from '@/lib/user-store';
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || '',
-  key_secret: process.env.RAZORPAY_KEY_SECRET || '',
-});
+function getRazorpay() {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const Razorpay = require('razorpay');
+  return new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID || '',
+    key_secret: process.env.RAZORPAY_KEY_SECRET || '',
+  });
+}
 
 export async function POST() {
   try {
@@ -38,7 +41,7 @@ export async function POST() {
     let customerId = await getRazorpayCustomerId(email);
 
     if (!customerId) {
-      const customer = await (razorpay.customers.create({
+      const customer = await (getRazorpay().customers.create({
         name,
         email,
         fail_existing: 0,
@@ -48,7 +51,7 @@ export async function POST() {
     }
 
     // Create subscription
-    const subscription = await razorpay.subscriptions.create({
+    const subscription = await getRazorpay().subscriptions.create({
       plan_id: planId,
       customer_notify: 1,
       total_count: 120,
