@@ -379,8 +379,8 @@ export default function ToolClientPage() {
                       <label className="text-xs font-semibold text-text-muted uppercase tracking-wider block mb-2">
                         Custom Alias (Optional)
                       </label>
-                      <div className="relative flex items-center">
-                        <span className="absolute left-4 text-text-muted text-sm border-r border-surface-border pr-3">
+                      <div className="flex items-center bg-background border border-surface-border rounded-xl focus-within:ring-2 focus-within:ring-accent transition-all">
+                        <span className="shrink-0 pl-4 pr-3 text-text-muted text-sm border-r border-surface-border">
                           {typeof window !== 'undefined' ? window.location.host : ''}/s/
                         </span>
                         <input
@@ -389,7 +389,8 @@ export default function ToolClientPage() {
                           value={customAlias}
                           onChange={(e) => setCustomAlias(e.target.value)}
                           disabled={shortenLoading}
-                          className="w-full bg-background border border-surface-border rounded-xl pl-32 pr-4 py-3.5 text-base text-text-primary focus:outline-none focus:ring-2 focus:ring-accent placeholder:text-text-muted transition-all"
+                          autoComplete="off"
+                          className="w-full bg-transparent border-none rounded-r-xl px-4 py-3.5 text-base text-text-primary focus:outline-none placeholder:text-text-muted"
                         />
                       </div>
                     </div>
