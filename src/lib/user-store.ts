@@ -42,10 +42,14 @@ export async function getUserTier(email: string): Promise<UserTier> {
   return memoryTiers.get(email) || 'free';
 }
 
-export async function setUserTier(email: string, tier: UserTier): Promise<void> {
+export async function setUserTier(email: string, tier: UserTier, ttlSeconds?: number): Promise<void> {
   if (redis) {
     try {
-      await redis.set(tierKey(email), tier);
+      if (ttlSeconds) {
+        await redis.set(tierKey(email), tier, { ex: ttlSeconds });
+      } else {
+        await redis.set(tierKey(email), tier);
+      }
       return;
     } catch (err) {
       console.error('Redis setUserTier error:', err);

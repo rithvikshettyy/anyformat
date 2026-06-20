@@ -207,7 +207,7 @@ export default function DashboardPage() {
                 }`}>
                   {tier === 'enterprise' ? 'Enterprise' : 'Free'}
                 </span>
-                {tier === 'enterprise' && <span className="text-text-muted text-sm">₹499/month</span>}
+                {tier === 'enterprise' && <span className="text-text-muted text-sm">₹599/month</span>}
               </div>
               <div className="space-y-2 text-sm text-text-secondary mb-6">
                 <p>Short links: {tier === 'enterprise' ? 'Unlimited' : '15/month'}</p>

@@ -43,14 +43,29 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Payment verified — upgrade user
-    await setUserTier(session.user.email, 'enterprise');
+    // Fetch order to get billing cycle from notes
+    const keyId = process.env.RAZORPAY_KEY_ID;
+    const orderRes = await fetch(`https://api.razorpay.com/v1/orders/${razorpay_order_id}`, {
+      headers: {
+        Authorization: 'Basic ' + Buffer.from(`${keyId}:${keySecret}`).toString('base64'),
+      },
+    });
+    const order = await orderRes.json();
+    const billingCycle = order?.notes?.billingCycle || 'monthly';
+
+    const TTL: Record<string, number> = {
+      monthly: 30 * 24 * 60 * 60,
+      yearly: 365 * 24 * 60 * 60,
+    };
+
+    await setUserTier(session.user.email, 'enterprise', TTL[billingCycle]);
 
     return NextResponse.json({
       success: true,
       data: {
         paymentId: razorpay_payment_id,
         orderId: razorpay_order_id,
+        billingCycle,
       },
     });
   } catch (error) {

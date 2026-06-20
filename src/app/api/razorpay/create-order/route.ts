@@ -12,11 +12,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { amount, plan } = await req.json();
+    const { billingCycle } = await req.json();
 
-    if (!amount || amount < 100) {
+    const PLANS: Record<string, { amount: number; label: string }> = {
+      monthly: { amount: 59900, label: 'Enterprise Monthly' },
+      yearly: { amount: 600000, label: 'Enterprise Yearly' },
+    };
+
+    const plan = PLANS[billingCycle];
+    if (!plan) {
       return NextResponse.json(
-        { success: false, error: 'Minimum amount is ₹1 (100 paise)' },
+        { success: false, error: 'Invalid billing cycle' },
         { status: 400 }
       );
     }
@@ -38,12 +44,13 @@ export async function POST(req: NextRequest) {
         Authorization: 'Basic ' + Buffer.from(`${keyId}:${keySecret}`).toString('base64'),
       },
       body: JSON.stringify({
-        amount,
+        amount: plan.amount,
         currency: 'INR',
         receipt: `ent_${Date.now()}`,
         notes: {
           email: session.user.email,
-          plan: plan || 'enterprise',
+          plan: 'enterprise',
+          billingCycle,
         },
       }),
     });
