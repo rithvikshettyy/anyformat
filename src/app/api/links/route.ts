@@ -18,8 +18,8 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ success: false, error: 'Auth required' }, { status: 401 });
   }
   const { code } = await req.json();
-  if (!code) {
-    return NextResponse.json({ success: false, error: 'Missing code' }, { status: 400 });
+  if (!code || typeof code !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(code)) {
+    return NextResponse.json({ success: false, error: 'Invalid code' }, { status: 400 });
   }
   await deleteLink(code, session.user.email);
   return NextResponse.json({ success: true });

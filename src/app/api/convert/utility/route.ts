@@ -189,13 +189,13 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { success: false, error: `Unsupported action: ${action}` },
+      { success: false, error: 'Unsupported action' },
       { status: 400 }
     );
   } catch (error) {
     console.error('Utility API error:', error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Processing failed' },
+      { success: false, error: 'Processing failed' },
       { status: 500 }
     );
   }

@@ -7,9 +7,9 @@ export async function GET(
 ) {
   const jobId = params.jobId;
 
-  if (!jobId) {
+  if (!jobId || !/^[a-zA-Z0-9_-]+$/.test(jobId)) {
     return NextResponse.json(
-      { success: false, error: 'Job ID is required' },
+      { success: false, error: 'Invalid job ID' },
       { status: 400 }
     );
   }
@@ -42,7 +42,7 @@ export async function GET(
   } catch (error) {
     console.error('Job query error:', error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Failed to query job status' },
+      { success: false, error: 'Failed to query job status' },
       { status: 500 }
     );
   }

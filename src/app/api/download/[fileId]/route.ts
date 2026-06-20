@@ -11,6 +11,14 @@ export async function GET(
 ) {
   try {
     const { fileId } = params;
+
+    if (!/^[a-f0-9-]{36}$/.test(fileId)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid file ID' },
+        { status: 400 }
+      );
+    }
+
     const file = await findFileById(fileId);
 
     if (!file) {

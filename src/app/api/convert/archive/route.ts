@@ -28,6 +28,14 @@ export async function POST(req: NextRequest) {
 
     const action = (formData.get('action') as string) || 'create';
     const outputFormat = (formData.get('outputFormat') as string) || 'zip';
+
+    const ALLOWED_OUTPUT = ['zip', 'tar', 'gz', 'tar.gz', '7z'];
+    if (!ALLOWED_OUTPUT.includes(outputFormat)) {
+      return NextResponse.json(
+        { success: false, error: 'Unsupported output format' },
+        { status: 400 }
+      );
+    }
     const files = formData.getAll('file') as File[];
 
     if (files.length === 0) {
@@ -80,7 +88,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('Archive queue enqueue error:', error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Processing failed' },
+      { success: false, error: 'Processing failed' },
       { status: 500 }
     );
   }

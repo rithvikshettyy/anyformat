@@ -22,6 +22,14 @@ export async function POST(req: NextRequest) {
     const action = (formData.get('action') as string) || 'convert';
     const outputFormat = (formData.get('outputFormat') as string) || 'pdf';
 
+    const ALLOWED_OUTPUT = ['pdf', 'docx', 'xlsx', 'pptx', 'odt', 'ods', 'odp', 'txt', 'csv', 'html', 'png', 'jpg', 'jpeg'];
+    if (!ALLOWED_OUTPUT.includes(outputFormat)) {
+      return NextResponse.json(
+        { success: false, error: 'Unsupported output format' },
+        { status: 400 }
+      );
+    }
+
     if (!file) {
       return NextResponse.json(
         { success: false, error: 'No file provided' },
@@ -59,7 +67,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('Document conversion error:', error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Processing failed' },
+      { success: false, error: 'Processing failed' },
       { status: 500 }
     );
   }

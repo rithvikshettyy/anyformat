@@ -20,6 +20,14 @@ export async function POST(req: NextRequest) {
 
     const action = (formData.get('action') as string) || 'convert';
     const outputFormat = (formData.get('outputFormat') as string) || 'png';
+
+    const ALLOWED_OUTPUT = ['jpg', 'jpeg', 'png', 'webp', 'avif', 'gif', 'tiff', 'bmp'];
+    if (action === 'convert' && !ALLOWED_OUTPUT.includes(outputFormat)) {
+      return NextResponse.json(
+        { success: false, error: 'Unsupported output format' },
+        { status: 400 }
+      );
+    }
     const quality = parseInt((formData.get('quality') as string) || '90', 10);
     const width = parseInt((formData.get('width') as string) || '0', 10);
     const height = parseInt((formData.get('height') as string) || '0', 10);
@@ -96,7 +104,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('Image conversion error:', error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Processing failed' },
+      { success: false, error: 'Processing failed' },
       { status: 500 }
     );
   }

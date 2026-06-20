@@ -24,10 +24,40 @@ export async function POST(req: NextRequest) {
     const url = formData.get('url') as string | null;
     const format = (formData.get('format') as string) || 'mp4';
 
+    const ALLOWED_OUTPUT = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'gif'];
+    if (!ALLOWED_OUTPUT.includes(outputFormat) || !ALLOWED_OUTPUT.includes(format)) {
+      return NextResponse.json(
+        { success: false, error: 'Unsupported output format' },
+        { status: 400 }
+      );
+    }
+
+    if (quality < 0 || quality > 51 || isNaN(quality)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid quality value' },
+        { status: 400 }
+      );
+    }
+
     if (action === 'download') {
       if (!url) {
         return NextResponse.json(
           { success: false, error: 'No URL provided' },
+          { status: 400 }
+        );
+      }
+
+      try {
+        const parsed = new URL(url);
+        if (!['http:', 'https:'].includes(parsed.protocol)) {
+          return NextResponse.json(
+            { success: false, error: 'Only HTTP/HTTPS URLs allowed' },
+            { status: 400 }
+          );
+        }
+      } catch {
+        return NextResponse.json(
+          { success: false, error: 'Invalid URL' },
           { status: 400 }
         );
       }
@@ -90,7 +120,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('Video queue enqueue error:', error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Processing failed' },
+      { success: false, error: 'Processing failed' },
       { status: 500 }
     );
   }
