@@ -69,13 +69,17 @@ export async function processConversion(data: {
 
     case 'pdf': {
       const {
-        mergePdfs, splitPdf, imageToPdf, rotatePdf, watermarkPdf, protectPdf,
+        mergePdfs, splitPdf, pdfToImage, imageToPdf, rotatePdf, watermarkPdf, protectPdf,
       } = await import('./converters/pdf');
 
       if (action === 'merge') {
         result = await mergePdfs(filePaths!);
       } else if (action === 'split') {
         result = await splitPdf(filePath!, options.pages || '1');
+      } else if (action === 'pdf-to-image') {
+        result = await pdfToImage(filePath!, outputFormat);
+      } else if (action === 'convert' && ['jpg', 'jpeg', 'png'].includes(outputFormat)) {
+        result = await pdfToImage(filePath!, outputFormat);
       } else if (action === 'image-to-pdf') {
         result = await imageToPdf(filePaths!);
       } else if (action === 'rotate') {

@@ -83,7 +83,7 @@ export async function compressPdf(
 }
 
 /**
- * Convert PDF pages to images using Ghostscript.
+ * Convert PDF pages to images using MuPDF (WASM — works on serverless).
  * Single-page PDFs return a single image; multi-page PDFs return a ZIP of images.
  */
 export async function pdfToImage(
@@ -93,38 +93,28 @@ export async function pdfToImage(
   await ensureTempDir();
   const fileId = generateFileId();
   const ext = outputFormat === 'jpg' || outputFormat === 'jpeg' ? 'jpg' : 'png';
-  const device = ext === 'jpg' ? 'jpeg' : 'png16m';
 
-  let gsCmd = 'gs';
-  if (process.platform === 'win32') {
-    try {
-      execSync('where.exe gswin64c', { stdio: 'ignore' });
-      gsCmd = 'gswin64c';
-    } catch {
-      try {
-        execSync('where.exe gswin32c', { stdio: 'ignore' });
-        gsCmd = 'gswin32c';
-      } catch {
-        gsCmd = 'gswin64c';
-      }
-    }
-  }
-
+  const mupdf = await import('mupdf');
   const bytes = await readFile(inputPath);
-  const doc = await PDFDocument.load(bytes);
-  const pageCount = doc.getPageCount();
+  const doc = mupdf.Document.openDocument(bytes, 'application/pdf');
+  const pageCount = doc.countPages();
+
+  const renderPage = (pageIndex: number): Buffer => {
+    const page = doc.loadPage(pageIndex);
+    const scaleFactor = 300 / 72; // 300 DPI
+    const matrix = mupdf.Matrix.scale(scaleFactor, scaleFactor);
+    const pixmap = page.toPixmap(matrix, mupdf.ColorSpace.DeviceRGB, false, true);
+    const imgBytes = ext === 'jpg' ? pixmap.asJPEG(90) : pixmap.asPNG();
+    return Buffer.from(imgBytes);
+  };
 
   if (pageCount === 1) {
-    const outputPath = getTempPath(fileId, ext);
-    execSync(
-      `${gsCmd} -sDEVICE=${device} -r300 -dNOPAUSE -dQUIET -dBATCH -sOutputFile="${outputPath}" "${inputPath}"`,
-      { timeout: 60000 }
-    );
-    return { filePath: outputPath, fileId };
+    const buffer = renderPage(0);
+    return saveTempBuffer(buffer, ext);
   }
 
   // Multi-page: render each page, then ZIP
-  const { mkdir, rm: rmDir } = await import('fs/promises');
+  const { mkdir, rm: rmDir, writeFile } = await import('fs/promises');
   const { join } = await import('path');
   const { default: archiver } = await import('archiver');
   const { createWriteStream, readdirSync } = await import('fs');
@@ -133,10 +123,11 @@ export async function pdfToImage(
   const imgDir = join(TEMP_DIR, `${fileId}_pages`);
   await mkdir(imgDir, { recursive: true });
 
-  execSync(
-    `${gsCmd} -sDEVICE=${device} -r300 -dNOPAUSE -dQUIET -dBATCH -sOutputFile="${join(imgDir, `page-%03d.${ext}`)}" "${inputPath}"`,
-    { timeout: 120000 }
-  );
+  for (let i = 0; i < pageCount; i++) {
+    const buffer = renderPage(i);
+    const pageName = `page-${String(i + 1).padStart(3, '0')}.${ext}`;
+    await writeFile(join(imgDir, pageName), buffer);
+  }
 
   const outputPath = getTempPath(fileId, 'zip');
 

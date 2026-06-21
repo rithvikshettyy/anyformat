@@ -18,6 +18,7 @@ export type ConversionAction =
   | 'word-count'
   | 'seo-generate'
   | 'shorten-link'
+  | 'pdf-to-image'
   | 'pdf-to-excel'
   | 'ppt-to-pdf'
   | 'protect'

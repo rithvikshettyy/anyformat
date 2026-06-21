@@ -135,8 +135,7 @@ export const TOOLS: ConversionTool[] = [
     inputFormats: ['pdf'],
     outputFormats: ['jpg', 'png'],
     icon: 'convert',
-    action: 'convert',
-    requiresBinary: true,
+    action: 'pdf-to-image',
   },
   {
     slug: 'image-to-pdf',
