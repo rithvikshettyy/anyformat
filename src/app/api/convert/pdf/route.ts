@@ -80,9 +80,10 @@ export async function POST(req: NextRequest) {
     const job = await conversionQueue.add(jobData);
     return NextResponse.json({ success: true, data: { jobId: job.id } });
   } catch (error) {
-    console.error('PDF conversion error:', error);
+    const message = error instanceof Error ? error.message : 'Processing failed';
+    console.error('PDF conversion error:', message, error);
     return NextResponse.json(
-      { success: false, error: 'Processing failed' },
+      { success: false, error: message },
       { status: 500 }
     );
   }

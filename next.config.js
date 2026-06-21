@@ -2,7 +2,7 @@
 const nextConfig = {
   output: 'standalone',
   experimental: {
-    serverComponentsExternalPackages: ['sharp'],
+    serverComponentsExternalPackages: ['sharp', 'mupdf'],
   },
   webpack: (config, { isServer }) => {
     if (isServer) {
@@ -10,6 +10,7 @@ const nextConfig = {
         { module: /node_modules\/@upstash\/redis/ },
       ];
     }
+    config.experiments = { ...config.experiments, asyncWebAssembly: true };
     return config;
   },
   images: {
