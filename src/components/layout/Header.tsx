@@ -6,7 +6,9 @@ import { usePathname } from 'next/navigation';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Sun, Moon } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import { useTheme } from '@/components/ThemeProvider';
 
 const NAV_ITEMS = [
   { href: '/', label: 'Home' },
@@ -20,6 +22,7 @@ const NAV_ITEMS = [
 export default function Header() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -65,6 +68,14 @@ export default function Header() {
 
           {/* Auth + Mobile Toggle */}
           <div className="flex items-center gap-3">
+            <button
+              onClick={toggleTheme}
+              className="text-text-secondary hover:text-text-primary transition-colors p-1.5 rounded-lg hover:bg-surface border border-transparent hover:border-surface-border flex items-center justify-center"
+              aria-label="Toggle theme"
+            >
+              {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+            </button>
+
             <a
               href="https://github.com/rithvikshettyy"
               target="_blank"

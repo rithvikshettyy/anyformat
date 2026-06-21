@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Theme Variables ─── */
+:root {
+  --color-background: #ffffff;
+  --color-surface: #f5f5f5;
+  --color-surface-hover: #ebebeb;
+  --color-surface-border: #e0e0e0;
+  --color-text-primary: #111111;
+  --color-text-secondary: #555555;
+  --color-text-muted: #999999;
+}
+
+.dark {
+  --color-background: #0f0f0f;
+  --color-surface: #1a1a1a;
+  --color-surface-hover: #242424;
+  --color-surface-border: #2a2a2a;
+  --color-text-primary: #f5f5f5;
+  --color-text-secondary: #a0a0a0;
+  --color-text-muted: #666666;
+}
+
 /* ─── Base Styles ─── */
 @layer base {
   * {
@@ -28,16 +49,16 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: #0f0f0f;
+    background: var(--color-surface);
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #2a2a2a;
+    background: var(--color-surface-border);
     border-radius: 3px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #3a3a3a;
+    background: var(--color-text-muted);
   }
 
   /* Focus Styles */
@@ -49,7 +70,7 @@
   /* Selection */
   ::selection {
     background: rgba(224, 61, 47, 0.3);
-    color: #f5f5f5;
+    color: var(--color-text-primary);
   }
 }
 
@@ -72,7 +93,7 @@
   }
 
   .text-gradient {
-    background: linear-gradient(135deg, #f5f5f5, #a0a0a0);
+    background: linear-gradient(135deg, var(--color-text-primary), var(--color-text-secondary));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -88,9 +109,10 @@
 
   .grid-bg {
     background-image:
-      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      linear-gradient(var(--color-surface-border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-surface-border) 1px, transparent 1px);
     background-size: 60px 60px;
+    opacity: 0.3;
   }
 
   /* Progress bar fill animation */

@@ -6,19 +6,20 @@ const config: Config = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
-        background: "#0f0f0f",
-        surface: "#1a1a1a",
-        "surface-hover": "#242424",
-        "surface-border": "#2a2a2a",
+        background: "var(--color-background)",
+        surface: "var(--color-surface)",
+        "surface-hover": "var(--color-surface-hover)",
+        "surface-border": "var(--color-surface-border)",
         accent: "#e03d2f",
         "accent-hover": "#c4342a",
         "accent-glow": "rgba(224, 61, 47, 0.15)",
-        "text-primary": "#f5f5f5",
-        "text-secondary": "#a0a0a0",
-        "text-muted": "#666666",
+        "text-primary": "var(--color-text-primary)",
+        "text-secondary": "var(--color-text-secondary)",
+        "text-muted": "var(--color-text-muted)",
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
