@@ -66,22 +66,25 @@ export default function ToolsListClient({ initialCategory }: ToolsListClientProp
           >
             All ({AVAILABLE_TOOLS.length})
           </button>
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.slug}
-              onClick={() => handleCategoryChange(cat.slug)}
-              className={`
-                px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                ${
-                  activeCategory === cat.slug
-                    ? 'bg-accent text-white border border-transparent'
-                    : 'bg-surface text-text-secondary hover:text-text-primary border border-surface-border hover:border-text-muted'
-                }
-              `}
-            >
-              {cat.name} ({AVAILABLE_TOOLS.filter(t => t.category === cat.slug).length})
-            </button>
-          ))}
+          {CATEGORIES.filter((cat) => AVAILABLE_TOOLS.some(t => t.category === cat.slug)).map((cat) => {
+            const count = AVAILABLE_TOOLS.filter(t => t.category === cat.slug).length;
+            return (
+              <button
+                key={cat.slug}
+                onClick={() => handleCategoryChange(cat.slug)}
+                className={`
+                  px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                  ${
+                    activeCategory === cat.slug
+                      ? 'bg-accent text-white border border-transparent'
+                      : 'bg-surface text-text-secondary hover:text-text-primary border border-surface-border hover:border-text-muted'
+                  }
+                `}
+              >
+                {cat.name} ({count})
+              </button>
+            );
+          })}
         </div>
 
         {/* Search Bar Input */}

@@ -39,13 +39,13 @@ export default function HomePage() {
             All the tools you need
           </h2>
           <p className="text-text-secondary max-w-lg mx-auto">
-            {AVAILABLE_TOOLS.length} conversion tools across {CATEGORIES.length} categories, all running on your own
+            {AVAILABLE_TOOLS.length} conversion tools across {CATEGORIES.filter(c => AVAILABLE_TOOLS.some(t => t.category === c.slug)).length} categories, all running on your own
             server
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {CATEGORIES.map((cat) => (
+          {CATEGORIES.filter((cat) => AVAILABLE_TOOLS.some(t => t.category === cat.slug)).map((cat) => (
             <div key={cat.slug}>
               <Link href={`/tools?category=${cat.slug}`}>
                 <div className="card-base p-6 group cursor-pointer h-full hover:-translate-y-1 transition-transform duration-300">

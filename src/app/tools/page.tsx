@@ -64,7 +64,7 @@ export default function ToolsPage({ searchParams }: ToolsPageProps) {
             All Conversion Tools
           </h1>
           <p className="text-text-secondary text-lg">
-            {AVAILABLE_TOOLS.length} tools across {CATEGORIES.length} categories
+            {AVAILABLE_TOOLS.length} tools across {CATEGORIES.filter(c => AVAILABLE_TOOLS.some(t => t.category === c.slug)).length} categories
           </p>
         </div>
 
